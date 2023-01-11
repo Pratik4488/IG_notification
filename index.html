@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>welcome to IG notification client side</h1>
+    
+    <input type="text" id="notification-message-input">
+    <button id="submit_btn">Submit</button>
+    
+    <div id="notification-messages" style="border: 1px solid red;"></div>
+    <hr><hr>
+
+    <input type="text" id="message-input">
+    <button id="message_submit_btn">Send</button>
+    
+    <div id="messages"></div>
+    <script  src="http://localhost:3000/socket.io/socket.io.js">
+    </script>
+    <script>
+        const MsgBox = document.getElementById("messages");
+        const notificationMsg = document.getElementById("notification-messages");
+        const msgInput = document.getElementById("notification-message-input");
+        const message = document.getElementById("messages");
+        const chatMsgInput = document.getElementById("message-input");
+        var socket = io("http://localhost:3000/")
+        socket.on("connect", ()=>{
+            console.log(socket.id);
+        })
+        socket.on("user-connected", (sid)=>{
+            notificationMsg.append(sid + " connected...")
+        })
+        socket.on("new-notify", (data, sid)=>{
+            const newNotify = document.createElement("div");
+            newNotify.innerText = "new Notification from "+sid+ ": "+ data;
+            notificationMsg.append(newNotify)
+        })
+        socket.on("new-msg", (data, sid)=>{
+            const newMsg = document.createElement("div");
+            newMsg.innerText = sid+ ": "+ data;
+            MsgBox.append(newMsg)
+        })
+
+        document.getElementById("submit_btn").addEventListener("click", ()=>{
+            console.log(msgInput.value);
+            socket.emit("new-notification", msgInput.value, socket.id );
+        }) 
+        document.getElementById("message_submit_btn").addEventListener("click", ()=>{
+            console.log(msgInput.value);
+            socket.emit("new-message", chatMsgInput.value, socket.id );
+        }) 
+    </script>
+</body>
+</html>
